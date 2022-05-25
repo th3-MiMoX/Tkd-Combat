@@ -1,10 +1,12 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, filedialog
 from tkinter.messagebox import *
+from typing import Type
 from PIL import Image, ImageTk
+from openpyxl import Workbook, load_workbook
 import xlsxwriter as xw 
+import pandas as pd
 
-wbcompt = xw.Workbook("Listado_de_Competidores.xlsx")
 
 class App(Tk):
 
@@ -12,7 +14,7 @@ class App(Tk):
         Tk.__init__(self)
         self.geometry("1000x450")
         self.title('Tkd Competitors')
-        self.iconbitmap(r'.\Proyecto\tkd.ico')
+        self.iconbitmap('tkd.ico')
         self.resizable(0,0)
 
         self._frame = None
@@ -98,7 +100,6 @@ class Competidor(Frame):
         cinturones = ['Blanco','Blanco-Amarillo','Amarillo','Amarillo-Verde',
                      'Verde','Verde-Azul','Azul','Azul-Rojo','Rojo','Rojo-Negro',
                      'Negro']
-
         
         clc = Label(self.label_frame,text="Color Cinturon: ", bg='#145DA0', font=(10))
         clc.grid(row=3,column=0,pady=(0,10))
@@ -138,14 +139,56 @@ class Competidor(Frame):
             peso = float(self.pscE.get())
         except ValueError:
             showerror("Error","Debe Escribir el peso del/a competidor/a")
-        else:
-            
+        try:
+            wb = load_workbook("Listado_de_Competidores_Kyrugi.xlsx")
             datos = (
                 ['Nombre','Edad','Peso','Sexo','Color Cinturon'],
                 [nm, edad, peso, sex, clc]
             )
             print(datos)
-            #print(f"El nombre es: {self.nmcE.get()},'Edad :{self.edadE.get()}','Peso: {self.pscE.get()}','Sexo: {self.optSex.get()}','Cinturon: {self.clcbx.get()}' ")
+
+            ws = wb["Listado General de Competidores"]
+            wb.active = ws
+            current_row = ws.max_row
+
+            ws.cell(row=current_row + 1, column=1).value = nm
+            ws.cell(row=current_row + 1, column=2).value = edad
+            ws.cell(row=current_row + 1, column=3).value = sex
+            ws.cell(row=current_row + 1, column=4).value = peso
+            ws.cell(row=current_row + 1, column=5).value = clc
+
+            wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
+            print(f'Nombre de hoja: {wb.active.title}')
+
+
+            if peso <= 79:
+                ws1 = wb["Categoria Menor a 80Kg"]
+                wb.active = ws1
+                current_row = ws1.max_row
+
+                ws1.cell(row=current_row + 1, column=1).value = nm
+                ws1.cell(row=current_row + 1, column=2).value = edad
+                ws1.cell(row=current_row + 1, column=3).value = sex
+                ws1.cell(row=current_row + 1, column=4).value = peso
+                ws1.cell(row=current_row + 1, column=5).value = clc
+
+                wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
+                print(f'Nombre de hoja: {wb.active.title}')
+                
+            if peso >= 80:
+                ws2 = wb["Categoria Mayor a 80Kg"]
+                wb.active = ws2
+                current_row = ws2.max_row
+
+                ws2.cell(row=current_row + 1, column=1).value = nm
+                ws2.cell(row=current_row + 1, column=2).value = edad
+                ws2.cell(row=current_row + 1, column=3).value = sex
+                ws2.cell(row=current_row + 1, column=4).value = peso
+                ws2.cell(row=current_row + 1, column=5).value = clc
+
+                wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
+                print(f'Nombre de hoja: {wb.active.title}')
+            
 
             self.nmcE.delete(0,END),
             self.edadE.delete(0,END),
@@ -153,36 +196,40 @@ class Competidor(Frame):
             self.optSex.set(None),
             self.clcbx.current(0)
 
+        except IOError:
+            showinfo('Informacion', 'Se esta creando el archivo excel. Guarde nuevamente al competidor.')
+            wb = Workbook()
+            ws = wb.active
 
-        # datos = (
-        #         ['Nombre','Edad','Peso','Sexo','Color Cinturon'],
-        #         [nm, edad, peso, sex, clc]
-        #      )
-        
+            ws.title = "Listado General de Competidores"
+            ws['A1'] = "NOMBRE COMPLETO"
+            ws['B1'] = "EDAD"
+            ws['C1'] = "SEXO"
+            ws['D1'] = "PESO"
+            ws['E1'] = "COLOR CINTURON"
+            
 
-        # wsCompet = wbcompt.add_worksheet('Categoria_1')
-        # row_number = 0
-        #     col_number = 0
+            ws1 = wb.create_sheet("Categoria Menor a 80Kg")
 
-        #     for nombre, edad, peso, sexo, colc in datos:
-        #         wsCompet.write(row_number, col_number, nombre),
-        #         wsCompet.write(row_number, col_number+1, edad),
-        #         wsCompet.write(row_number, col_number+2, peso),
-        #         wsCompet.write(row_number, col_number+3, sexo),
-        #         wsCompet.write(row_number,col_number+4, colc)
+            ws1['A1'] = "NOMBRE COMPLETO"
+            ws1['B1'] = "EDAD"
+            ws1['C1'] = "SEXO"
+            ws1['D1'] = "PESO"
+            ws1['E1'] = "COLOR CINTURON"
 
-        #         row_number += 1
+            ws2 = wb.create_sheet("Categoria Mayor a 80Kg")
 
-        #     wbcompt.close()
-        
-   
-        
-
-
-                
+            ws2['A1'] = "NOMBRE COMPLETO"
+            ws2['B1'] = "EDAD"
+            ws2['C1'] = "SEXO"
+            ws2['D1'] = "PESO"
+            ws2['E1'] = "COLOR CINTURON"
 
 
-        
+
+            wb.save('Listado_de_Competidores_Kyrugi.xlsx')
+
+
 class ListCompet(Frame):
     def __init__(self,master):
         Frame.__init__(self,master)
@@ -193,9 +240,9 @@ class ListCompet(Frame):
         btn_frame.grid_propagate(0)
 
         # Frame Labels and buttons
-        label_frame = Frame(self, bg='#A0E7E5', width=800, height=800)
-        label_frame.pack(padx=0, pady=0, side='left')
-        label_frame.grid_propagate(0)   
+        self.label_frame = Frame(self, bg='#A0E7E5', width=800, height=800)
+        self.label_frame.pack(padx=0, pady=0, side='left')
+        self.label_frame.grid_propagate(0)   
 
         #Buttons Opntions
         btn_agr = Button(btn_frame, text='Agregar Competidor/a', bd=5, command=lambda: master.switch_frame(Competidor))
@@ -207,6 +254,88 @@ class ListCompet(Frame):
         btn_word = Button(btn_frame, text='Crear Llaves', bd=5, command=lambda: master.switch_frame(CreateKeys))
         btn_word.grid(row=2, column=0, padx=25, pady=30, ipadx=5, ipady= 5)
 
+        self.WidgetCompet()
+
+    def WidgetCompet(self):
+        
+        frame1 = LabelFrame(self.label_frame, text='Informacion Excel')
+        frame1.place(height=300, width=800, rely=0.04)
+
+        listado_frame = LabelFrame(self.label_frame, text='listado de Hojas')
+        listado_frame.place(height=100, width=200, rely=0.75, relx=0.65)
+
+        sheet = ttk.Combobox(listado_frame, state='readonly')
+        sheet.grid(row=1, column=1, padx=20)
+        sheet.set('Listado General de Competidores')
+
+        file_frame = LabelFrame(self.label_frame, text='Abrir archivo')
+        file_frame.place(height=100, width=400, rely=0.75, relx=0.1)
+
+        button1 = Button(file_frame, text='Buscar un archivo', command=lambda: File_dialog())
+        button1.place(rely= 0.65, relx= 0.55)
+
+        button2 = Button(file_frame, text='Cargar archivo', command=lambda: load_excel_data())
+        button2.place(rely=0.65, relx=0.30)
+
+        label_file = ttk.Label(file_frame, text='Archivo No Seleccionado')
+        label_file.place(rely=0, relx=0)
+
+        tv1 = ttk.Treeview(frame1)
+        tv1.place(relheight=1, relwidth=1)
+
+        scrolly = Scrollbar(frame1, orient='vertical', command=tv1.yview)
+        scrollx = Scrollbar(frame1, orient='horizontal', command=tv1.xview)
+        tv1.configure(xscrollcommand=scrollx.set, yscrollcommand=scrolly.set)
+        scrollx.pack(side='bottom', fill="x")
+        scrolly.pack(side='right', fill="y")
+        
+        def File_dialog():
+            filename = filedialog.askopenfilename( initialdir="./", title="Seleccionar Archivo", filetypes=(("xlsx files", "*.xlsx"), ("All files", "*.*") ))
+            label_file["text"] = filename
+            return None
+
+        def load_excel_data():
+
+            hojas = sheet.get()
+
+            file_path = label_file["text"]
+            try:
+                excel_filename = r'{}'.format(file_path)
+                if excel_filename[-4:] == ".csv":
+                    df = pd.read_csv(excel_filename, sheet_name=hojas)
+                else:
+                    df = pd.read_excel(excel_filename, sheet_name=hojas)
+
+            except ValueError:
+                showerror("Information", "El archivo que a elegido es invalido")
+                return None
+            except FileNotFoundError:
+                showerror("Information", f"No existe el archivo {file_path}")
+                return None
+
+            listnom(excel_filename)
+            
+            clear_data()
+            tv1["column"] = list(df.columns)
+            tv1["show"] = "headings"
+            for column in tv1['column']:
+                tv1.heading(column, text=column)
+            
+            df_rows = df.to_numpy().tolist()
+            for row in df_rows:
+                tv1.insert("", "end", values=row)
+            return None
+
+        def clear_data():
+            tv1.delete(*tv1.get_children())
+            return None
+
+        def listnom(sheets):
+            wb = load_workbook(sheets)
+            wb.active
+            nom_sheets = list(wb.sheetnames)
+            sheet['values'] = nom_sheets
+            
 
 class CreateKeys(Frame):
     def __init__(self,master):
