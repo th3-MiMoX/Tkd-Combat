@@ -141,11 +141,11 @@ class Competidor(Frame):
             showerror("Error","Debe Escribir el peso del/a competidor/a")
         try:
             wb = load_workbook("Listado_de_Competidores_Kyrugi.xlsx")
-            datos = (
-                ['Nombre','Edad','Peso','Sexo','Color Cinturon'],
-                [nm, edad, peso, sex, clc]
-            )
-            print(datos)
+            # datos = (
+            #     ['Nombre','Edad','Peso','Sexo','Color Cinturon'],
+            #     [nm, edad, peso, sex, clc]
+            # )
+            # print(datos)
 
             ws = wb["Listado General de Competidores"]
             wb.active = ws
@@ -266,7 +266,7 @@ class ListCompet(Frame):
 
         sheet = ttk.Combobox(listado_frame, state='readonly')
         sheet.grid(row=1, column=1, padx=20)
-        sheet.set('Listado General de Competidores')
+        # sheet.set('Listado General de Competidores')
 
         file_frame = LabelFrame(self.label_frame, text='Abrir archivo')
         file_frame.place(height=100, width=400, rely=0.75, relx=0.1)
@@ -292,10 +292,11 @@ class ListCompet(Frame):
         def File_dialog():
             filename = filedialog.askopenfilename( initialdir="./", title="Seleccionar Archivo", filetypes=(("xlsx files", "*.xlsx"), ("All files", "*.*") ))
             label_file["text"] = filename
+            listnom(filename)
+            sheet.current(0)
             return None
 
         def load_excel_data():
-
             hojas = sheet.get()
 
             file_path = label_file["text"]
@@ -313,7 +314,7 @@ class ListCompet(Frame):
                 showerror("Information", f"No existe el archivo {file_path}")
                 return None
 
-            listnom(excel_filename)
+            # listnom(excel_filename)
             
             clear_data()
             tv1["column"] = list(df.columns)
