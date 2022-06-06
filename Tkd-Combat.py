@@ -1,11 +1,11 @@
 from tkinter import *
 from tkinter import ttk, filedialog
 from tkinter.messagebox import *
-from typing import Type
 from PIL import Image, ImageTk
 from openpyxl import Workbook, load_workbook
 import xlsxwriter as xw 
 import pandas as pd
+import random
 
 
 class App(Tk):
@@ -59,6 +59,7 @@ class Competidor(Frame):
     def _createWidget(self):
 
         self.optSex = StringVar()
+        self.optKop = StringVar()
 
         def only_numbers(char):
             return char.isdigit()
@@ -82,9 +83,20 @@ class Competidor(Frame):
         self.rbSex2 = ttk.Radiobutton(sxc, variable=self.optSex, value='F',text='Femenino')
         self.rbSex2.grid(row=1, column=3, padx=20, pady=10)
 
+        #Kyorugi o Poomsae
+        kop = ttk.LabelFrame(self.label_frame, text="Kyorugi o Poomsae")
+        kop.grid(row=2, column=2, pady=20 ,padx=(100,0))
+
+        self.rbKop = ttk.Radiobutton(kop, variable=self.optKop, value="K", text="Kyorugi")
+        self.rbKop.grid(row=0, column=4, padx=20, pady=10)
+
+        self.rbKop2 = ttk.Radiobutton(kop, variable=self.optKop, value="P", text="Poomsae")
+        self.rbKop2.grid(row=1, column=4, padx=2, pady=10)
+
+
         #Edad
-        edc = Label(self.label_frame, text="Edad Competidor/a: ", bg='#145DA0', font=(10))
-        edc.grid(row=1, column=0, pady=0, padx=(50,0))
+        edadc = Label(self.label_frame, text="Edad Competidor/a: ", bg='#145DA0', font=(10))
+        edadc.grid(row=1, column=0, pady=0, padx=(50,0))
 
         self.edadE = Entry(self.label_frame,font=(10), width=8, validate='key', validatecommand=(validation, '%S'))
         self.edadE.grid( row=1, column=1, padx=20)
@@ -100,13 +112,12 @@ class Competidor(Frame):
         cinturones = ['Blanco','Blanco-Amarillo','Amarillo','Amarillo-Verde',
                      'Verde','Verde-Azul','Azul','Azul-Rojo','Rojo','Rojo-Negro',
                      'Negro']
-        
+                
         clc = Label(self.label_frame,text="Color Cinturon: ", bg='#145DA0', font=(10))
         clc.grid(row=3,column=0,pady=(0,10))
 
         self.clcbx = ttk.Combobox(self.label_frame,values=cinturones, state='readonly',font=(10), width=14)
         self.clcbx.grid(row=3, column=1, padx=20)
-        self.clcbx.current(0)
 
         #Button
         btn_sv = Button(self.label_frame,text="Guardar", bd=5, command=self.save_data)
@@ -114,9 +125,7 @@ class Competidor(Frame):
 
     # Save_Data es la funcion que va a guardar los datos en excel
     def save_data(self):
-        
-        clc = self.clcbx.get()
-        
+                
         try:
             nm = str(self.nmcE.get())
             if nm.isdigit() :
@@ -127,74 +136,149 @@ class Competidor(Frame):
             (showerror("Error","Debe Escribir el Nombre del/a competidor/a Correctamente"))
         try: 
             sex = self.optSex.get()
-            if sex == '':
+            if len(sex) == 0:
                 raise ValueError()
         except ValueError:
             showerror("Error","Debe Seleccionar el sexo del/a competidor/a")
         try:
-            edad = int(self.edadE.get())
+            edad = self.edadE.get()
+            if len(edad) == 0:
+                raise ValueError()
         except ValueError:
             showerror("Error","Debe Escribir la edad del/a competidor/a")
         try:
             peso = float(self.pscE.get())
+            if peso <=0 :
+                exit
+                raise ValueError()
         except ValueError:
             showerror("Error","Debe Escribir el peso del/a competidor/a")
-        try:
-            wb = load_workbook("Listado_de_Competidores_Kyrugi.xlsx")
-            # datos = (
-            #     ['Nombre','Edad','Peso','Sexo','Color Cinturon'],
-            #     [nm, edad, peso, sex, clc]
-            # )
-            # print(datos)
-
-            ws = wb["Listado General de Competidores"]
-            wb.active = ws
-            current_row = ws.max_row
-
-            ws.cell(row=current_row + 1, column=1).value = nm
-            ws.cell(row=current_row + 1, column=2).value = edad
-            ws.cell(row=current_row + 1, column=3).value = sex
-            ws.cell(row=current_row + 1, column=4).value = peso
-            ws.cell(row=current_row + 1, column=5).value = clc
-
-            wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
-            print(f'Nombre de hoja: {wb.active.title}')
-
-
-            if peso <= 79:
-                ws1 = wb["Categoria Menor a 80Kg"]
-                wb.active = ws1
-                current_row = ws1.max_row
-
-                ws1.cell(row=current_row + 1, column=1).value = nm
-                ws1.cell(row=current_row + 1, column=2).value = edad
-                ws1.cell(row=current_row + 1, column=3).value = sex
-                ws1.cell(row=current_row + 1, column=4).value = peso
-                ws1.cell(row=current_row + 1, column=5).value = clc
-
-                wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
-                print(f'Nombre de hoja: {wb.active.title}')
-                
-            if peso >= 80:
-                ws2 = wb["Categoria Mayor a 80Kg"]
-                wb.active = ws2
-                current_row = ws2.max_row
-
-                ws2.cell(row=current_row + 1, column=1).value = nm
-                ws2.cell(row=current_row + 1, column=2).value = edad
-                ws2.cell(row=current_row + 1, column=3).value = sex
-                ws2.cell(row=current_row + 1, column=4).value = peso
-                ws2.cell(row=current_row + 1, column=5).value = clc
-
-                wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
-                print(f'Nombre de hoja: {wb.active.title}')
             
+        try:
+            # Poomsaes
+            BasPoomsae = ["Il Jang", "I Jang", "Sam Jang", "Sa Jang", "Oh Jang", "Yuk Jang", "Chil Jang", "Pal Jang"]
+            SupPoomsae = ["Koryo", "Kungan", "Taebaek", "Pyongwon", "Sipjing", "Jitae", "Chonkwon", "Hansu", "Ilyeo"]
+            
+            basicPoomsae = random.choice(BasPoomsae)
+            advansedPoomsae = random.choice(SupPoomsae)
+            
+            kop = self.optKop.get()
 
-            self.nmcE.delete(0,END),
-            self.edadE.delete(0,END),
-            self.pscE.delete(0,END),
-            self.optSex.set(None),
-            self.clcbx.current(0)
+            if kop == "K":
+                clc = self.clcbx.get()
+                wb = load_workbook("Listado_de_Competidores_Kyrugi.xlsx")
+
+                ws = wb["Listado General de Competidores"]
+                wb.active = ws
+                current_row = ws.max_row
+                edad = self.edadE.get()
+                peso = self.pscE.get()
+
+                ws.cell(row=current_row + 1, column=1).value = nm
+                ws.cell(row=current_row + 1, column=2).value = edad
+                ws.cell(row=current_row + 1, column=3).value = sex
+                ws.cell(row=current_row + 1, column=4).value = peso
+                ws.cell(row=current_row + 1, column=5).value = clc
+
+                wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
+                print(f'Nombre de hoja: {wb.active.title}')
+
+
+                if peso <= "79":
+                    ws1 = wb["Categoria Menor a 80Kg"]
+                    wb.active = ws1
+                    current_row = ws1.max_row
+
+                    ws1.cell(row=current_row + 1, column=1).value = nm
+                    ws1.cell(row=current_row + 1, column=2).value = edad
+                    ws1.cell(row=current_row + 1, column=3).value = sex
+                    ws1.cell(row=current_row + 1, column=4).value = peso
+                    ws1.cell(row=current_row + 1, column=5).value = clc
+
+                    wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
+                    print(f'Nombre de hoja: {wb.active.title}')
+                    
+                if peso >= "80":
+                    ws2 = wb["Categoria Mayor a 80Kg"]
+                    wb.active = ws2
+                    current_row = ws2.max_row
+
+                    ws2.cell(row=current_row + 1, column=1).value = nm
+                    ws2.cell(row=current_row + 1, column=2).value = edad
+                    ws2.cell(row=current_row + 1, column=3).value = sex
+                    ws2.cell(row=current_row + 1, column=4).value = peso
+                    ws2.cell(row=current_row + 1, column=5).value = clc
+
+                    wb.save('Listado_de_Competidores_Kyrugi.xlsx')  
+                    print(f'Nombre de hoja: {wb.active.title}')
+                
+
+                self.nmcE.delete(0,END),
+                self.edadE.delete(0,END),
+                self.pscE.delete(0,END),
+                self.optSex.set(None),
+                self.clcbx.current(0)
+
+            elif kop == "P":
+                clc = self.clcbx.get()
+                wb = load_workbook("Listado_de_Competidores_Poomsae.xlsx")
+
+                ws = wb["Listado General de Competidores"]
+                wb.active = ws
+                current_row = ws.max_row
+                edad = self.edadE.get()
+                peso = self.pscE.get()
+
+                ws.cell(row=current_row + 1, column=1).value = nm
+                ws.cell(row=current_row + 1, column=2).value = edad
+                ws.cell(row=current_row + 1, column=3).value = sex
+                ws.cell(row=current_row + 1, column=4).value = peso
+                ws.cell(row=current_row + 1, column=5).value = clc
+
+                wb.save("Listado_de_Competidores_Poomsae.xlsx")  
+                print(f'Nombre de hoja: {wb.active.title}')
+
+
+                if clc == "Blanco":
+                    ws1 = wb["Categoria Junior"]
+                    wb.active = ws1
+                    current_row = ws1.max_row
+
+                    ws1.cell(row=current_row + 1, column=1).value = nm
+                    ws1.cell(row=current_row + 1, column=2).value = edad
+                    ws1.cell(row=current_row + 1, column=3).value = sex
+                    ws1.cell(row=current_row + 1, column=4).value = peso
+                    ws1.cell(row=current_row + 1, column=5).value = clc
+                    ws1.cell(row=current_row + 1, column=6).value = basicPoomsae
+                    print(nm+" "+basicPoomsae)
+
+                    wb.save("Listado_de_Competidores_Poomsae.xlsx")  
+                    print(f'Nombre de hoja: {wb.active.title}')
+                    
+                if clc == "Rojo":
+                    ws2 = wb["Categoria Danes"]
+                    wb.active = ws2
+                    current_row = ws2.max_row
+
+                    ws2.cell(row=current_row + 1, column=1).value = nm
+                    ws2.cell(row=current_row + 1, column=2).value = edad
+                    ws2.cell(row=current_row + 1, column=3).value = sex
+                    ws2.cell(row=current_row + 1, column=4).value = peso
+                    ws2.cell(row=current_row + 1, column=5).value = clc
+                    ws2.cell(row=current_row + 1, column=6).value = advansedPoomsae
+                    print(nm+" "+advansedPoomsae)
+
+                    wb.save("Listado_de_Competidores_Poomsae.xlsx")  
+                    print(f'Nombre de hoja: {wb.active.title}')
+                
+
+                self.nmcE.delete(0,END),
+                self.edadE.delete(0,END),
+                self.pscE.delete(0,END),
+                self.optSex.set(None),
+                self.clcbx.current(0)
+            else:
+                showerror("Error", "Tiene que elegir una las opciones 'Kyorugi' o 'Poomsae' ")
 
         except IOError:
             showinfo('Informacion', 'Se esta creando el archivo excel. Guarde nuevamente al competidor.')
@@ -225,10 +309,36 @@ class Competidor(Frame):
             ws2['D1'] = "PESO"
             ws2['E1'] = "COLOR CINTURON"
 
-
-
             wb.save('Listado_de_Competidores_Kyrugi.xlsx')
 
+            wb2 = Workbook()
+            wsp = wb2.active
+
+            wsp.title = "Listado General de Competidores"
+            wsp['A1'] = "NOMBRE COMPLETO"
+            wsp['B1'] = "EDAD"
+            wsp['C1'] = "SEXO"
+            wsp['D1'] = "PESO"
+            wsp['E1'] = "COLOR CINTURON"
+
+            wsp1 = wb2.create_sheet("Categoria Junior")
+            wsp1['A1'] = "NOMBRE COMPLETO"
+            wsp1['B1'] = "EDAD"
+            wsp1['C1'] = "SEXO"
+            wsp1['D1'] = "PESO"
+            wsp1['E1'] = "COLOR CINTURON"
+            wsp1['F1'] = "Poomsae a Realizar"
+
+            wsp2 = wb2.create_sheet("Categoria Danes")
+            wsp2['A1'] = "NOMBRE COMPLETO"
+            wsp2['B1'] = "EDAD"
+            wsp2['C1'] = "SEXO"
+            wsp2['D1'] = "PESO"
+            wsp2['E1'] = "COLOR CINTURON"
+            wsp2['F1'] = "Poomsae a Realizar"
+
+            wb2.save('Listado_de_Competidores_Poomsae.xlsx')
+        
 
 class ListCompet(Frame):
     def __init__(self,master):
